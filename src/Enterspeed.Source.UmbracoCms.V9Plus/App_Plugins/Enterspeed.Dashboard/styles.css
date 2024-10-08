@@ -1,0 +1,122 @@
+﻿.dashboard-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 10px;
+}
+
+.dashboard-list-item, .dashboard-list-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.background-hover:hover {
+    background-color: #f3f3f5;
+}
+
+.dashboard-list-header {
+    font-weight: 700;
+}
+
+.dashboard-list-item-property {
+    display: flex;
+    padding: 5px 20px 5px 0;
+}
+
+    .dashboard-list-item-property .checkbox {
+        margin-top: 0px;
+    }
+
+.dashboard-list-item-exception {
+    padding: 20px;
+    margin: 5px 0 20px 0;
+    border: 1px solid #e9e9eb;
+}
+
+.dashboard-list li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.seed-dashboard-response {
+    padding: 5px 0 20px 5px;
+}
+
+.configuration-dashboard-property {
+    padding: 10px 5px;
+}
+
+    .configuration-dashboard-property label {
+        font-weight: 700;
+    }
+
+    .configuration-dashboard-property input {
+        width: 750px;
+    }
+
+.info-box {
+    width: 750px;
+    border-radius: 3px;
+    background-color: #2152a3;
+    font-size: 15px;
+    line-height: 20px;
+    margin-bottom: 0;
+    padding: 6px 14px;
+    vertical-align: middle;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.seed-dashboard-text {
+    padding: 0 0 20px 5px;
+}
+
+.custom-seed-content-type-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.custom-seed-content-type-box {
+    flex: 1;
+    margin: 0 5px 0 5px;
+    padding: 0 10px 10px 10px;
+    border: solid #E9E9EC 1px;
+    border-radius: 3px;
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, .16);
+}
+
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+    .custom-tooltip .custom-tooltiptext {
+        visibility: hidden;
+        width: 220px;
+        background-color: black;
+        color: #fff;
+        text-align: center;
+        border-radius: 3px;
+        padding: 6px;
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+        font-weight: normal;
+        font-size: 12px;
+    }
+
+        .custom-tooltip .custom-tooltiptext a {
+            color: white;
+            font-weight: bold;
+        }
+
+
+    .custom-tooltip:hover .custom-tooltiptext {
+        visibility: visible;
+    }

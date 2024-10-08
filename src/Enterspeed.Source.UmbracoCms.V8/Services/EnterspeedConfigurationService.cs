@@ -6,7 +6,9 @@ using Enterspeed.Source.UmbracoCms.V8.Providers;
 using Newtonsoft.Json;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
+using Umbraco.Core.Configuration;
 using Umbraco.Core.Services;
+using Umbraco.Core.Sync;
 
 namespace Enterspeed.Source.UmbracoCms.V8.Services
 {
@@ -21,8 +23,7 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
         private readonly string _configurationMediaDomainDatabaseKey = "Enterspeed+Configuration+MediaDomain";
         private readonly string _configurationApiKeyDatabaseKey = "Enterspeed+Configuration+ApiKey";
         private readonly string _configurationPreviewApiKeyDatabaseKey = "Enterspeed+Configuration+PreviewApiKey";
-        private readonly string _configurationConnectionTimeoutDatabaseKey =
-            "Enterspeed+Configuration+ConnectionTimeout";
+        private readonly string _configurationConnectionTimeoutDatabaseKey = "Enterspeed+Configuration+ConnectionTimeout";
         private readonly string _configurationBaseUrlDatabaseKey = "Enterspeed+Configuration+BaseUrl";
 
         public EnterspeedConfigurationService(IKeyValueService keyValueService)
@@ -66,7 +67,10 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
                 MediaDomain = webConfigMediaDomain?.Trim(),
                 IsConfigured = true,
                 PreviewApiKey = webConfigPreviewApikey?.Trim(),
+                SystemInformation = GetUmbracoVersion()
             };
+
+            SetOptionalSettings(_configuration);
 
             return _configuration;
         }
@@ -112,11 +116,11 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
                 _keyValueService.SetValue(_configurationDatabaseKey, null);
             }
 
+            _configuration = configuration;
+
             // Reinitialize connections in case of changes in the configuration
             var connectionProvider = Current.Factory.GetInstance<IEnterspeedConnectionProvider>();
             connectionProvider.Initialize();
-
-            _configuration = configuration;
         }
 
         [Obsolete("Use GetCombinedConfigurationFromDatabase() instead.", false)]
@@ -129,7 +133,15 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
                 return null;
             }
 
-            return JsonConvert.DeserializeObject<EnterspeedUmbracoConfiguration>(savedConfigurationValue);
+            var configuration = JsonConvert.DeserializeObject<EnterspeedUmbracoConfiguration>(savedConfigurationValue);
+
+            if (configuration != null)
+            {
+                configuration.SystemInformation = GetUmbracoVersion();
+                SetOptionalSettings(configuration);
+            }
+
+            return configuration;
         }
 
         private EnterspeedUmbracoConfiguration GetCombinedConfigurationFromDatabase()
@@ -146,13 +158,14 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
             var connectionTimeoutAsString = _keyValueService.GetValue(_configurationConnectionTimeoutDatabaseKey);
             var previewApiKey = _keyValueService.GetValue(_configurationPreviewApiKeyDatabaseKey);
 
-            var configuration = new EnterspeedUmbracoConfiguration()
+            var configuration = new EnterspeedUmbracoConfiguration
             {
                 IsConfigured = true,
                 ApiKey = apiKey,
                 BaseUrl = baseUrl,
                 MediaDomain = mediaDomain,
-                PreviewApiKey = previewApiKey
+                PreviewApiKey = previewApiKey,
+                SystemInformation = GetUmbracoVersion()
             };
 
             if (int.TryParse(connectionTimeoutAsString, out var connectionTimeout))
@@ -160,7 +173,20 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
                 configuration.ConnectionTimeout = connectionTimeout;
             }
 
+            SetOptionalSettings(configuration);
+
             return configuration;
+        }
+
+        private void SetOptionalSettings(EnterspeedUmbracoConfiguration configuration)
+        {
+            bool.TryParse(ConfigurationManager.AppSettings["Enterspeed.RunJobsOnAllServerRoles"], out var runJobsOnAllServerRoles);
+            configuration.RunJobsOnAllServerRoles = runJobsOnAllServerRoles;
+        }
+
+        private static string GetUmbracoVersion()
+        {
+            return $"Umbraco-{UmbracoVersion.Current.Major}.{UmbracoVersion.Current.Minor}.{UmbracoVersion.Current.Build}";
         }
     }
 }

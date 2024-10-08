@@ -1,4 +1,5 @@
 ﻿using Enterspeed.Source.UmbracoCms.V8.Guards;
+using Enterspeed.Source.UmbracoCms.V8.Handlers;
 using Umbraco.Core.Composing;
 
 namespace Enterspeed.Source.UmbracoCms.V8.Components.DataPropertyValueConverter
@@ -8,6 +9,12 @@ namespace Enterspeed.Source.UmbracoCms.V8.Components.DataPropertyValueConverter
         public static EnterspeedPropertyValueConverterCollectionBuilder EnterspeedPropertyValueConverters(
             this Composition composition)
             => composition.WithCollectionBuilder<EnterspeedPropertyValueConverterCollectionBuilder>();
+
+        public static EnterspeedPropertyDataMapperCollectionBuilder EnterspeedPropertyDataMappers(this Composition composition)
+            => composition.WithCollectionBuilder<EnterspeedPropertyDataMapperCollectionBuilder>();
+
+        public static EnterspeedPropertyMetaDataMapperCollectionBuilder EnterspeedPropertyMetaDataMappers(this Composition composition)
+            => composition.WithCollectionBuilder<EnterspeedPropertyMetaDataMapperCollectionBuilder>();
 
         public static EnterspeedGridEditorValueConverterCollectionBuilder EnterspeedGridEditorValueConverters(
             this Composition composition)
@@ -20,5 +27,12 @@ namespace Enterspeed.Source.UmbracoCms.V8.Components.DataPropertyValueConverter
         public static EnterspeedDictionaryItemHandlingGuardCollectionBuilder EnterspeedDictionaryItemHandlingGuards(
             this Composition composition)
             => composition.WithCollectionBuilder<EnterspeedDictionaryItemHandlingGuardCollectionBuilder>();
+
+        public static EnterspeedMediaHandlingGuardCollectionBuilder EnterspeedMediaHandlingGuards(
+            this Composition composition)
+            => composition.WithCollectionBuilder<EnterspeedMediaHandlingGuardCollectionBuilder>();
+
+        public static EnterspeedJobHandlerCollectionBuilder EnterspeedJobHandlers(this Composition composition)
+            => composition.WithCollectionBuilder<EnterspeedJobHandlerCollectionBuilder>();
     }
 }

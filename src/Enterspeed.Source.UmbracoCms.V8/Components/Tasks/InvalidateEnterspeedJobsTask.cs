@@ -1,5 +1,4 @@
-﻿using Enterspeed.Source.UmbracoCms.V8.Handlers;
-using Enterspeed.Source.UmbracoCms.V8.Services;
+﻿using Enterspeed.Source.UmbracoCms.V8.Services;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using Umbraco.Core.Sync;
@@ -11,7 +10,7 @@ namespace Enterspeed.Source.UmbracoCms.V8.Components.Tasks
     {
         private readonly IRuntimeState _runtime;
         private readonly IProfilingLogger _logger;
-        private readonly IEnterspeedJobHandler _enterspeedJobHandler;
+        private readonly IEnterspeedJobsHandlingService _enterspeedJobsHandlingService;
         private readonly IEnterspeedConfigurationService _configurationService;
 
         public InvalidateEnterspeedJobsTask(
@@ -20,14 +19,14 @@ namespace Enterspeed.Source.UmbracoCms.V8.Components.Tasks
             int periodMilliseconds,
             IRuntimeState runtime,
             IProfilingLogger logger,
-            IEnterspeedJobHandler enterspeedJobHandler,
-            IEnterspeedConfigurationService configurationService)
+            IEnterspeedConfigurationService configurationService,
+            IEnterspeedJobsHandlingService enterspeedJobsHandlingService)
             : base(runner, delayMilliseconds, periodMilliseconds)
         {
             _runtime = runtime;
             _logger = logger;
-            _enterspeedJobHandler = enterspeedJobHandler;
             _configurationService = configurationService;
+            _enterspeedJobsHandlingService = enterspeedJobsHandlingService;
         }
 
         public override bool IsAsync => false;
@@ -40,13 +39,13 @@ namespace Enterspeed.Source.UmbracoCms.V8.Components.Tasks
                 return true;
             }
 
-            if (_runtime.ServerRole == ServerRole.Master || _runtime.ServerRole == ServerRole.Single)
+            if(_enterspeedJobsHandlingService.IsJobsProcessingEnabled())
             {
-                _enterspeedJobHandler.InvalidateOldProcessingJobs();
+                _enterspeedJobsHandlingService.InvalidateOldProcessingJobs();
             }
             else
             {
-                _logger.Debug<InvalidateEnterspeedJobsTask>("Does not run on servers with {role} role.", _runtime.ToString());
+                _logger.Info<InvalidateEnterspeedJobsTask>("Enterspeed jobs does not run on servers with {role} role.", _runtime.ToString());
             }
 
             return true;

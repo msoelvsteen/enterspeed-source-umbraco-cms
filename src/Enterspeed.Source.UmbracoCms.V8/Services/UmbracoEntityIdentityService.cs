@@ -1,14 +1,21 @@
 ﻿using System;
+using Enterspeed.Source.UmbracoCms.V8.Providers;
 using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Models;
 using Umbraco.Core.Models.PublishedContent;
-using Umbraco.Web;
 
 namespace Enterspeed.Source.UmbracoCms.V8.Services
 {
     public class UmbracoEntityIdentityService : IEntityIdentityService
     {
+        private readonly IUmbracoCultureProvider _umbracoCultureProvider;
+
+        public UmbracoEntityIdentityService(IUmbracoCultureProvider umbracoCultureProvider)
+        {
+            _umbracoCultureProvider = umbracoCultureProvider;
+        }
+
         public string GetId(IPublishedContent content, string culture)
         {
             if (content == null)
@@ -18,10 +25,15 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
 
             if (string.IsNullOrWhiteSpace(culture) || !content.ContentType.VariesByCulture())
             {
-                culture = GetDefaultCulture();
+                culture = GetDefaultCulture(content);
             }
 
             return GetId(content.Id, culture);
+        }
+
+        public string GetId(int contentId)
+        {
+            return contentId.ToString();
         }
 
         public string GetId(int contentId, string culture)
@@ -31,7 +43,12 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
 
         public string GetId(string contentId, string culture)
         {
-            return $"{contentId}-{culture}";
+            if (!string.IsNullOrWhiteSpace(culture))
+            {
+                return $"{contentId}-{culture}";
+            }
+
+            return $"{contentId}";
         }
 
         public string GetId(IDictionaryItem dictionaryItem, string culture)
@@ -44,6 +61,16 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
             return GetId(dictionaryItem.Key, culture);
         }
 
+        public string GetId(IMedia mediaItem)
+        {
+            if (mediaItem == null)
+            {
+                return null;
+            }
+
+            return GetId(mediaItem.Id.ToString());
+        }
+
         public string GetId(Guid? id, string culture)
         {
             if (!id.HasValue || string.IsNullOrWhiteSpace(culture))
@@ -54,13 +81,19 @@ namespace Enterspeed.Source.UmbracoCms.V8.Services
             return GetId(id.ToString(), culture);
         }
 
-        private static string GetDefaultCulture()
+        public string GetId(string id)
         {
-            var contextFactory = Current.Factory.GetInstance<IUmbracoContextFactory>();
-            using (var context = contextFactory.EnsureUmbracoContext())
+            if (string.IsNullOrEmpty(id))
             {
-                return context.UmbracoContext.Domains.DefaultCulture.ToLowerInvariant();
+                return null;
             }
+
+            return GetId(id, string.Empty);
+        }
+
+        private string GetDefaultCulture(IPublishedContent content)
+        {
+            return _umbracoCultureProvider.GetCultureForNonCultureVariant(content);
         }
     }
 }

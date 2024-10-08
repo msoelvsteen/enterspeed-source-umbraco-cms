@@ -48,14 +48,17 @@ namespace Enterspeed.Source.UmbracoCms.V7.Services
             }
 
             var dictionaryJobs = GetDictionaryJobs(publish, preview, out var dictionaryCount);
-            var jobs = contentJobs.Union(dictionaryJobs).ToList();
+            var mediaJobs = GetMediaJobs(publish, preview, out long mediaCount);
+
+            var jobs = contentJobs.Union(dictionaryJobs).Union(mediaJobs).ToList();
             _enterspeedJobRepository.Save(jobs);
 
             return new SeedResponse
             {
                 ContentCount = publishContentCount + previewContentCount,
                 DictionaryCount = dictionaryCount,
-                JobsAdded = jobs.Count
+                JobsAdded = jobs.Count,
+                MediaCount = mediaCount
             };
         }
 
@@ -134,6 +137,34 @@ namespace Enterspeed.Source.UmbracoCms.V7.Services
             }
 
             dictionaryCount = allDictionaryItems.Count;
+
+            return jobs;
+        }
+
+        public IEnumerable<EnterspeedJob> GetMediaJobs(bool publish, bool preview, out long mediaCount)
+        {
+            mediaCount = 0;
+            var jobs = new List<EnterspeedJob>();
+
+            var allMediaItems = ApplicationContext.Current.Services.MediaService
+                .GetPagedDescendants(-1, 0, int.MaxValue, out long _)
+                .Where(x => !x.Trashed)
+                .ToList();
+
+            foreach (var media in allMediaItems)
+            {
+                if (publish)
+                {
+                    jobs.Add(_enterspeedJobFactory.GetPublishJob(media, string.Empty, EnterspeedContentState.Publish));
+                }
+
+                if (preview)
+                {
+                    jobs.Add(_enterspeedJobFactory.GetPublishJob(media, string.Empty, EnterspeedContentState.Preview));
+                }
+            }
+
+            mediaCount = allMediaItems.Count;
 
             return jobs;
         }

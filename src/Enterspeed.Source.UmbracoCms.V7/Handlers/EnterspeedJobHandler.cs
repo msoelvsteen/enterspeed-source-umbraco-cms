@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Web.Helpers;
 using Enterspeed.Source.Sdk.Api.Models;
 using Enterspeed.Source.Sdk.Api.Services;
 using Enterspeed.Source.UmbracoCms.V7.Contexts;
@@ -10,6 +11,7 @@ using Enterspeed.Source.UmbracoCms.V7.Data.Repositories;
 using Enterspeed.Source.UmbracoCms.V7.Extensions;
 using Enterspeed.Source.UmbracoCms.V7.Factories;
 using Enterspeed.Source.UmbracoCms.V7.Models;
+using Enterspeed.Source.UmbracoCms.V7.Models.Api;
 using Enterspeed.Source.UmbracoCms.V7.Services;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
@@ -172,17 +174,39 @@ namespace Enterspeed.Source.UmbracoCms.V7.Handlers
                                 continue;
                             }
                         }
+                        else if (newestPublishJob.EntityType == EnterspeedJobEntityType.Media)
+                        {
+                            var parsed = int.TryParse(newestPublishJob.EntityId, out var parsedId);
+                            var media = parsed ? context.Application.Services.MediaService.GetById(parsedId) : null;
+
+                            if (media == null)
+                            {
+                                var exception = $"Media with id {newestPublishJob.EntityId} not in database";
+                                failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPublishJob, exception));
+                                LogHelper.Warn<EnterspeedJobHandler>(exception);
+                            }
+
+                            try
+                            {
+                                umbracoData = new UmbracoMediaEntity(media);
+                            }
+                            catch (Exception e)
+                            {
+                                // Create a new failed job
+                                var exception = $"Failed creating entity ({newestPublishJob.EntityId}). Message: {e.Message}. StackTrace: {e.StackTrace}";
+                                failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPublishJob, exception));
+                                LogHelper.Warn<EnterspeedJobHandler>(exception);
+                                continue;
+                            }
+                        }
 
                         var ingestResponse = _enterspeedPublishIngestService.Save(umbracoData);
                         if (!ingestResponse.Success)
                         {
                             // Create a new failed job
-                            var message = ingestResponse.Exception != null
-                                ? ingestResponse.Exception.Message
-                                : ingestResponse.Message;
+                            var message = Json.Encode(new ErrorResponse(ingestResponse));
 
-                            var exception =
-                                $"Failed ingesting entity ({newestPublishJob.EntityId}/{newestPublishJob.Culture}). Message: {message}";
+                            var exception = $"Failed ingesting entity ({newestPublishJob.EntityId}/{newestPublishJob.Culture}). Message: {message}";
                             failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPublishJob, exception));
                             LogHelper.Warn<EnterspeedJobHandler>(exception);
                         }
@@ -197,6 +221,10 @@ namespace Enterspeed.Source.UmbracoCms.V7.Handlers
                         else if (newestPublishJob.EntityType == EnterspeedJobEntityType.Dictionary)
                         {
                             id = _entityIdentityService.GetId(newestPublishJob.EntityId, newestPublishJob.Culture);
+                        }
+                        else if (newestPublishJob.EntityType == EnterspeedJobEntityType.Media)
+                        {
+                            id = _entityIdentityService.GetId(newestPublishJob.EntityId);
                         }
 
                         if (!string.IsNullOrWhiteSpace(id))
@@ -271,17 +299,39 @@ namespace Enterspeed.Source.UmbracoCms.V7.Handlers
                                 continue;
                             }
                         }
+                        else if (newestPreviewJob.EntityType == EnterspeedJobEntityType.Media)
+                        {
+                            var parsed = int.TryParse(newestPreviewJob.EntityId, out var parsedId);
+                            var media = parsed ? context.Application.Services.MediaService.GetById(parsedId) : null;
+
+                            if (media == null)
+                            {
+                                var exception = $"Media with id {newestPreviewJob.EntityId} not in database";
+                                failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPreviewJob, exception));
+                                LogHelper.Warn<EnterspeedJobHandler>(exception);
+                            }
+
+                            try
+                            {
+                                umbracoData = new UmbracoMediaEntity(media);
+                            }
+                            catch (Exception e)
+                            {
+                                // Create a new failed job
+                                var exception = $"Failed creating entity ({newestPublishJob.EntityId}). Message: {e.Message}. StackTrace: {e.StackTrace}";
+                                failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPublishJob, exception));
+                                LogHelper.Warn<EnterspeedJobHandler>(exception);
+                                continue;
+                            }
+                        }
 
                         var ingestResponse = _enterspeedPreviewIngestService.Save(umbracoData);
                         if (!ingestResponse.Success)
                         {
                             // Create a new failed job
-                            var message = ingestResponse.Exception != null
-                                ? ingestResponse.Exception.Message
-                                : ingestResponse.Message;
+                            var message = Json.Encode(new ErrorResponse(ingestResponse));
 
-                            var exception =
-                                $"Failed ingesting entity ({newestPreviewJob.EntityId}/{newestPreviewJob.Culture}). Message: {message}";
+                            var exception = $"Failed ingesting entity ({newestPreviewJob.EntityId}/{newestPreviewJob.Culture}). Message: {message}";
                             failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPreviewJob, exception));
                             LogHelper.Warn<EnterspeedJobHandler>(exception);
                         }
@@ -297,6 +347,10 @@ namespace Enterspeed.Source.UmbracoCms.V7.Handlers
                         {
                             id = _entityIdentityService.GetId(newestPreviewJob.EntityId, newestPreviewJob.Culture);
                         }
+                        else if (newestPreviewJob.EntityType == EnterspeedJobEntityType.Media)
+                        {
+                            id = _entityIdentityService.GetId(newestPreviewJob.EntityId, newestPreviewJob.Culture);
+                        }
 
                         if (!string.IsNullOrWhiteSpace(id))
                         {
@@ -307,7 +361,6 @@ namespace Enterspeed.Source.UmbracoCms.V7.Handlers
                                 var exception = $"Failed deleting entity ({newestPreviewJob.EntityId}/{newestPreviewJob.Culture}). Message: {deleteResponse.Message}";
                                 failedJobs.Add(_enterspeedJobFactory.GetFailedJob(newestPreviewJob, exception));
                                 LogHelper.Warn<EnterspeedJobHandler>(exception);
-                                continue;
                             }
                         }
                     }

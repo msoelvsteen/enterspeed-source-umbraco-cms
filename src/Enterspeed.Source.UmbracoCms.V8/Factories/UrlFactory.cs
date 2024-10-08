@@ -23,7 +23,7 @@ namespace Enterspeed.Source.UmbracoCms.V8.Factories
             _globalSettings = globalSettings;
         }
 
-        public string GetUrl(IPublishedContent content, bool preview, string culture)
+        public virtual string GetUrl(IPublishedContent content, bool preview, string culture)
         {
             var output = "#";
             var umb = _umbracoContextProvider.GetContext();
@@ -63,30 +63,32 @@ namespace Enterspeed.Source.UmbracoCms.V8.Factories
                 return output;
             }
 
-            var cleanedUrlArray = urlSegments.Select(x =>
-            {
-                var isSegmentAbsolute = Uri.TryCreate(x, UriKind.Absolute, out var segmeentUri);
-                if (isSegmentAbsolute)
+            var cleanedUrlArray = urlSegments.Select(
+                x =>
                 {
-                    return x.Trim('/');
-                }
+                    var isSegmentAbsolute = Uri.TryCreate(x, UriKind.Absolute, out var segmentUri);
+                    if (isSegmentAbsolute)
+                    {
+                        return x.Trim('/');
+                    }
 
-                return x.Trim('/');
-            });
+                    return x.Equals("/") ? x : x.Trim('/');
+                });
 
             var url = string.Join("/", cleanedUrlArray);
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+
+            // Make sure theres only one slash at the start of a relative url
+            if (Uri.IsWellFormedUriString(url, UriKind.Relative))
             {
-                url = GetAbsoluteUrl(url);
+                url = $"/{url.TrimStart('/')}";
             }
 
             return url.EnsureTrailingSlash();
         }
 
-        private string GetUrlSegment(string culture, IEnumerable<Domain> domains, IPublishedContent ancestor, string path, out bool isAssignedDomain)
+        protected virtual string GetUrlSegment(string culture, IEnumerable<Domain> domains, IPublishedContent ancestor, string path, out bool isAssignedDomain)
         {
-            var assignedDomain = domains.FirstOrDefault(x => x.ContentId == ancestor.Id && x.Culture.IetfLanguageTag.ToLower() == culture.ToLower());
-
+            var assignedDomain = domains.FirstOrDefault(x => x.ContentId == ancestor.Id && x.Culture.IetfLanguageTag.Equals(culture, StringComparison.OrdinalIgnoreCase));
             if (assignedDomain != null)
             {
                 if (assignedDomain.Name.StartsWith("/"))
@@ -130,12 +132,6 @@ namespace Enterspeed.Source.UmbracoCms.V8.Factories
                 isAssignedDomain = false;
                 return null;
             }
-        }
-
-        private string GetAbsoluteUrl(string relativeUrl)
-        {
-            var domain = $"http://localhost";
-            return domain + (!relativeUrl.StartsWith("/") ? $"/{relativeUrl}" : relativeUrl);
         }
     }
 }

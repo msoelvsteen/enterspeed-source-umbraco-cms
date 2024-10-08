@@ -60,9 +60,8 @@
     <Reference Include="CookComputing.XmlRpcV2, Version=2.5.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
       <HintPath>..\..\lib\packages\xmlrpcnet.2.5.0\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
-    <Reference Include="Enterspeed.Source.Sdk, Version=0.7.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\lib\packages\Enterspeed.Source.Sdk.0.7.0\lib\netstandard1.1\Enterspeed.Source.Sdk.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Enterspeed.Source.Sdk, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\lib\packages\Enterspeed.Source.Sdk.1.0.2\lib\netstandard1.1\Enterspeed.Source.Sdk.dll</HintPath>
     </Reference>
     <Reference Include="Examine, Version=0.1.68.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\lib\packages\Examine.0.1.68.0\lib\Examine.dll</HintPath>
@@ -254,12 +253,19 @@
     <Compile Include="Data\Schemas\EnterspeedJobSchema.cs" />
     <Compile Include="EventHandlers\ConfigurationEventHandler.cs" />
     <Compile Include="EventHandlers\ContentEventHandler.cs" />
+    <Compile Include="EventHandlers\MediaEventHandler.cs" />
     <Compile Include="EventHandlers\DictionaryEventHandler.cs" />
     <Compile Include="Extensions\ContentBaseExtensions.cs" />
     <Compile Include="Extensions\ContentExtensions.cs" />
+    <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\EnterspeedConfigurationExtensions.cs" />
+    <Compile Include="Extensions\MediaExtensions.cs" />
     <Compile Include="Extensions\UrlStringExtensions.cs" />
     <Compile Include="Factories\EnterspeedJobFactory.cs" />
+    <Compile Include="Models\Api\ErrorResponse.cs" />
+    <Compile Include="Models\Api\JobIdsToDelete.cs" />
+    <Compile Include="Models\UmbFile.cs" />
+    <Compile Include="Models\UmbracoMediaEntity.cs" />
     <Compile Include="Models\UmbracoModels\PublishedPropertyBase.cs" />
     <Compile Include="Models\UmbracoModels\PublishedProperty.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -293,10 +299,13 @@
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultImageCropperPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultLegacyMediaPickerPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultMarkdownEditorPropertyValueConverter.cs" />
+    <Compile Include="Services\DataProperties\DefaultConverters\DefaultMediaPicker2PropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultMediaPickerPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultMemberGroupPickerPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultMemberPickerPropertyValueConverter.cs" />
+    <Compile Include="Services\DataProperties\DefaultConverters\DefaultMultiNodeTreePicker2PropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultMultiNodeTreePickerPropertyValueConverter.cs" />
+    <Compile Include="Services\DataProperties\DefaultConverters\DefaultNestedContentPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultNumericPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultRelatedLinksPropertyValueConverter.cs" />
     <Compile Include="Services\DataProperties\DefaultConverters\DefaultRadioButtonListPropertyValueConverter.cs" />
@@ -343,17 +352,18 @@
     <Analyzer Include="..\..\lib\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\dashboard.controller.js" />
+    <Content Include="_nuget\icon.png" />
+    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\enterspeed-dashboard.controller.js" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\dashboard.html" />
-    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Resources\dashboard.resources.js" />
-    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Controllers\configuration.controller.js" />
-    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Controllers\failedjobs.controller.js" />
-    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Controllers\seed.controller.js" />
+    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Resources\enterspeed-dashboard.resources.js" />
+    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Controllers\enterspeed-configuration.controller.js" />
+    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Controllers\enterspeed-failedjobs.controller.js" />
+    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Controllers\enterspeed-seed.controller.js" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Views\configuration.view.html" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Views\failedjobs.view.html" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\Dashboard.Sub.Views\seed.view.html" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\lang\en-US.xml" />
-    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\settings-dashboard.controller.js" />
+    <Content Include="_content\App_Plugins\Enterspeed.Dashboard\enterspeed-settings-dashboard.controller.js" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\settings-dashboard.html" />
     <Content Include="_content\App_Plugins\Enterspeed.Dashboard\styles.css" />
     <None Include="_content\Config\Dashboard.config.install.xdt" />

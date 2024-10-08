@@ -57,7 +57,22 @@ namespace Enterspeed.Source.UmbracoCms.V7.Services
 
         public string GetId(string contentId, string culture)
         {
-            return $"{contentId}-{culture}";
+            if (!string.IsNullOrEmpty(culture))
+            {
+                return $"{contentId}-{culture}";
+            }
+
+            return contentId;
+        }
+
+        public string GetId(IMedia mediaItem)
+        {
+            if (mediaItem == null)
+            {
+                return null;
+            }
+
+            return GetId(mediaItem.Id.ToString());
         }
     }
 }
